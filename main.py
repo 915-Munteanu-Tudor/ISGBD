@@ -8,8 +8,15 @@ if __name__ == "__main__":
     StudName varchar(20),
     Email varchar(20)
     )"""
+    
+    sql2 = """CREATE TABLE marks (
+    StudID int(10) REFERENCES students(StudID),
+    DiscID varchar(20) REFERENCES disciplines(DiscID),
+    Mark int,
+    PRIMARY KEY (StudID,DiscID)
+    )"""
 
-    table = SqlParser().parse_create_table(sql)
+    table = SqlParser().parse_create_table(sql2)
 
     table_dict = table.to_dict()
     json_str = json.dumps(table_dict, indent=4)

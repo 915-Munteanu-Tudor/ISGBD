@@ -26,7 +26,7 @@ class SqlParser:
         table = Table(table_name)
 
         attr_defs = sql[sql.index("(") + 1 : sql.rindex(")")]
-        attr_list = [x.strip() for x in attr_defs.split(",")]
+        attr_list = [x.strip() for x in attr_defs.split(",\n")]
 
         for attr in attr_list:
             name = ""
@@ -39,6 +39,7 @@ class SqlParser:
                 keys = attr.split("(")[1].split(")")[0].split(",")
                 keys = [key.strip() for key in keys]
                 table.primary_key.extend(keys)
+                continue
             else:
                 if "PRIMARY KEY" in attr:
                     key_info = re.findall(r"\w+", attr.split("PRIMARY KEY")[0])
@@ -66,7 +67,7 @@ class SqlParser:
                     continue
 
             # Extract basic attribute details (name, type, length)
-            attr_info = re.findall(r"\w+", attr.split("REFERENCES")[0])
+            attr_info = re.findall(r"\w+", attr)
             name = attr_info[0]
             type = attr_info[1]
             if len(attr_info) > 2:
