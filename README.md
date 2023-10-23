@@ -1,1 +1,1 @@
-# MIni DBMS implementation
+# Mini DBMS Implementation
