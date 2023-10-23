@@ -12,7 +12,7 @@ if __name__ == "__main__":
     sql2 = """CREATE TABLE marks (
     StudID int(10) REFERENCES students(StudID),
     DiscID varchar(20) REFERENCES disciplines(DiscID),
-    Mark int,
+    Mark int NOT NULL,
     PRIMARY KEY (StudID,DiscID)
     )"""
 

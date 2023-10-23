@@ -33,6 +33,10 @@ class SqlParser:
             type = ""
             length = None
             is_null = True
+            
+            if "NOT NULL" in attr:
+                is_null = False
+                attr = attr.replace("NOT NULL", "").strip()
 
             # Check for PRIMARY KEY or REFERENCES (foreign key)
             if attr.strip().startswith("PRIMARY KEY"):
@@ -47,7 +51,7 @@ class SqlParser:
                     key_type = key_info[1]
                     key_length = key_info[2] if len(key_info) > 2 else None
                     new_attribute = Attribute(
-                        name=key_name, type=key_type, length=key_length
+                        name=key_name, type=key_type, length=key_length, is_null=is_null
                     )
                     table.attributes.append(new_attribute)
                     table.primary_key.append(key_name)
@@ -61,7 +65,7 @@ class SqlParser:
                     foreign_key = {"table": foreign_key[0], "attribute": foreign_key[1]}
                     table.foreign_keys[attr_name] = foreign_key
                     new_attribute = Attribute(
-                        name=attr_name, type=attr_type, length=attr_length
+                        name=attr_name, type=attr_type, length=attr_length, is_null=is_null
                     )
                     table.attributes.append(new_attribute)
                     continue
