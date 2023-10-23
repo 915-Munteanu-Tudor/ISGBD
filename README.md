@@ -1,1 +1,1 @@
-# ISGBD
+# MIni DBMS implementation
