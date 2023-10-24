@@ -9,7 +9,8 @@ class GlobalRepository:
     
     def __init__(self):
         self.file_path = os.path.join(os.getcwd(), 'resources', 'catalog.json')
-        self.databases = self.readFromFile()
+        # self.databases = self.readFromFile()
+        self.databases = {}
 
     def readFromFile(self):
         if not os.path.exists(self.file_path):
@@ -20,18 +21,13 @@ class GlobalRepository:
   
   
     def writeToFile(self):
-        print(self.databases.get("test").to_dict())
+        # print(self.databases.get("test").to_dict())
+        data_to_serialize = {name: table.to_dict() for name, table in self.databases.items()}
         with open(self.file_path, 'w') as f:
-            json.dump(self.databases.get("test").to_dict(), f, indent=4)
-
-    # def writeToFile(self):
-    #     print(self.databases.get("test").to_dict())
-    #     with open(self.file_path, 'w') as f:
-    #         json.dump((value.to_dict() for _, value in self.databases.items()), f, indent=4)
-
+            json.dump(data_to_serialize, f, indent=4)
+            # json.dump(self.databases.get("test").to_dict(), f, indent=4)
 
     def create_database(self, database):
-        
         self.databases[database.name] = database
         self.writeToFile()
     
