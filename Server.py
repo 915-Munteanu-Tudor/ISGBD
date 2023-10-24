@@ -1,12 +1,13 @@
 import socket
-
+from SqlParser import SqlParser
 from persistancy.GlobalRepository import GlobalRepository
+
 
 class Server:
     def __init__(self, host, port):
         self.host = host
         self.port = port
-        self.usedDB = None
+        self.parser = SqlParser()
 
     def start(self):
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -26,24 +27,18 @@ class Server:
             client_socket.close()
 
     def execute_command(self, command):
-        text = command.lower().split()
-        if command.startswith("use database") and len(text) == 3:
-            if self.is_existent_db(text[2]):
-                self.usedDB = text[2]
-                return "The used database is {}.".format(self.usedDB)
-            return "The database you want to use does not exist."
-        if command.startswith("create database") and len(text) == 3:
-            return "Database created successfully."
-        if command.startswith("drop database") and len(text) == 3:
-            if self.is_existent_db(text[2]):
-                return "Database dropped successfully."
-            return "The database you want to drop does not exist."
+        text = command
+        command = self.parser.cleanup_command(command)
+        if command[0] == "USE" and command[1] == "DATABASE":
+            return self.parser.parse_use_database(command)
+        if command[0] == "CREATE" and command[1] == "DATABASE":
+            return self.parser.parse_create_database(command)
+        if command[0] == "DROP" and command[1] == "DATABASE":
+            return self.parser.parse_drop_database(command)
+        if command[0] == "CREATE" and command[1] == "TABLE":
+            return self.parser.parse_create_table(text)
 
         return "Wrong command."
-
-    @staticmethod
-    def is_existent_db(dbName):
-        return True
 
 
 server = Server('localhost', 8083)

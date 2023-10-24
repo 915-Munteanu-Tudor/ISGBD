@@ -2,18 +2,21 @@ import re
 from model.Attribute import Attribute
 from model.Table import Table
 from model.DataBase import DataBase
+from persistancy.GlobalRepository import GlobalRepository
 
 
 class SqlParser:
     def __init__(self):
+        self.global_repo = GlobalRepository()
         self.used_db = None
-        # self.databases = []
 
     @staticmethod
-    def cleanup_command(command):
+    def cleanup_command(command, split=True):
         """removes whitespaces and capitalizes the string for easier processing"""
-        command = re.sub(" +", " ", command).strip()
-        command = command.upper().split()
+        command = re.sub(" +", " ", command).strip().upper()
+
+        if split:
+            command = command.split()
 
         return command
 
@@ -22,13 +25,23 @@ class SqlParser:
         @return: Table
         """
 
-        words = SqlParser.cleanup_command(sql)
-        table_name = words[words.index("TABLE") + 1]
+        if self.used_db is None:
+            return "Please use a database first."
+
+        sql = SqlParser.cleanup_command(sql, False)
+        words = sql.split()
+
+        table_name = words[2]
+
+        # TODO: check if table already exists in the used db
+        # if table_name in self.global_repo.databases.get(self.used_db).tables.keys():
+        #     return "The used database already contains a table with this name."
 
         table = Table(table_name)
 
         attr_defs = sql[sql.index("(") + 1: sql.rindex(")")]
         attr_list = [x.strip() for x in attr_defs.split(",\n")]
+        print(attr_list)
 
         for attr in attr_list:
             length = None
@@ -74,6 +87,7 @@ class SqlParser:
             attr_info = re.findall(r"\w+", attr)
             name = attr_info[0]
             type = attr_info[1]
+            print(attr_info)
             if len(attr_info) > 2:
                 length = int(attr_info[2])
 
@@ -81,34 +95,39 @@ class SqlParser:
             attribute = Attribute(name, type, length, is_null)
             table.attributes.append(attribute)
 
-        if self.used_db is None:
-            return "Please use a database first."
-
-        for db in self.databases:
-            if db.name == self.used_db:
-                db.tables.append(table)
-                break
-
-        return table
+        return "Table {} created successfully.".format(table_name)
 
     def parse_create_database(self, sql):
-        words = SqlParser.cleanup_command(sql)
-        if len(words) != 3:
+        if len(sql) != 3:
             return "Incorrect syntax."
-        db_name = words[words.index("DATABASE") + 1]
-        for db in self.databases:
-            if db.name == db_name:
-                return "The database name is taken."
-        self.databases.append(DataBase(db_name))
-        return "{} database created successfully.".format(db_name)
+
+        db_name = sql[2]
+        if db_name in self.global_repo.databases.keys():
+            return "The database name is taken."
+
+        self.global_repo.create_database(DataBase(db_name))
+        return "Database {} created successfully.".format(db_name)
+
+    def parse_drop_database(self, sql):
+        if len(sql) != 3:
+            return "Incorrect syntax."
+
+        db_name = sql[2]
+        if db_name in self.global_repo.databases.keys():
+            self.global_repo.drop_database(db_name)
+            if self.used_db == db_name:
+                self.used_db = None
+            return "Database {} dropped successfully.".format(db_name)
+
+        return "The database you want to drop does not exist."
 
     def parse_use_database(self, sql):
-        words = SqlParser.cleanup_command(sql)
-        if len(words) != 3:
+        if len(sql) != 3:
             return "Incorrect syntax."
-        db_name = words[words.index("DATABASE") + 1]
-        for db in self.databases:
-            if db.name == db_name:
-                self.used_db = db_name
-                return "The used database is {}.".format(self.used_db)
+
+        db_name = sql[2]
+        if db_name in self.global_repo.databases.keys():
+            self.used_db = db_name
+            return "The used database is {}.".format(self.used_db)
+
         return "The database you want to use does not exist."

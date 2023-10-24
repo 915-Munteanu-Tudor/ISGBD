@@ -6,12 +6,13 @@ from model.Attribute import Attribute
 
 
 if __name__ == "__main__":
-    # sql = """CREATE TABLE students (
-    # StudID int PRIMARY KEY,
-    # GroupId int REFERENCES groups(GroupID),
-    # StudName varchar(20),
-    # Email varchar(20)
-    # )"""
+    sql = """CREATE TABLE students (
+    StudID int PRIMARY KEY,
+    GroupId int REFERENCES groups(GroupID),
+    StudName varchar(20),
+    Email varchar(20)
+    )"""
+
     
     # sql2 = """CREATE TABLE marks (
     # StudID int(10) REFERENCES students(StudID),
@@ -22,7 +23,7 @@ if __name__ == "__main__":
 
     repo = GlobalRepository()
     
-    testdb = DataBase("test")
+    testdb = DataBase("TEST")
     
     testAttr = Attribute("id", "int", 10)
     
