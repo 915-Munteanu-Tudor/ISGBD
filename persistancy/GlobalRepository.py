@@ -20,8 +20,14 @@ class GlobalRepository:
   
   
     def writeToFile(self):
+        print(self.databases.get("test").to_dict())
         with open(self.file_path, 'w') as f:
-            json.dump(self.databases, f, indent=4)
+            json.dump(self.databases.get("test").to_dict(), f, indent=4)
+
+    # def writeToFile(self):
+    #     print(self.databases.get("test").to_dict())
+    #     with open(self.file_path, 'w') as f:
+    #         json.dump((value.to_dict() for _, value in self.databases.items()), f, indent=4)
 
 
     def create_database(self, database):

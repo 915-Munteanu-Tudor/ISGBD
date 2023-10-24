@@ -6,5 +6,5 @@ class DataBase:
     def to_dict(self):
         return {
             "name": self.name,
-            "tables": [table.to_dict() for table in self.tables],
+            "tables": [table.to_dict() for name, table in self.tables.items()],
         }

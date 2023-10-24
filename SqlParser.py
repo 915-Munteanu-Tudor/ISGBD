@@ -7,7 +7,7 @@ from model.DataBase import DataBase
 class SqlParser:
     def __init__(self):
         self.used_db = None
-        self.databases = []
+        # self.databases = []
 
     @staticmethod
     def cleanup_command(command):
