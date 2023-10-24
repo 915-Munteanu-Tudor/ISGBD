@@ -1,39 +1,39 @@
 import re
 from model.Attribute import Attribute
-
 from model.Table import Table
+from model.DataBase import DataBase
 
 
 class SqlParser:
+    def __init__(self):
+        self.used_db = None
+        self.databases = []
+
     @staticmethod
     def cleanup_command(command):
         """removes whitespaces and capitalizes the string for easier processing"""
         command = re.sub(" +", " ", command).strip()
-        command = command.upper()
+        command = command.upper().split()
+
         return command
 
-    @staticmethod
-    def parse_create_table(sql):
+    def parse_create_table(self, sql):
         """Parses a sql create table command and returns the new Table object
         @return: Table
         """
 
-        sql = SqlParser.cleanup_command(sql)
-        words = sql.split()
-
+        words = SqlParser.cleanup_command(sql)
         table_name = words[words.index("TABLE") + 1]
 
         table = Table(table_name)
 
-        attr_defs = sql[sql.index("(") + 1 : sql.rindex(")")]
+        attr_defs = sql[sql.index("(") + 1: sql.rindex(")")]
         attr_list = [x.strip() for x in attr_defs.split(",\n")]
 
         for attr in attr_list:
-            name = ""
-            type = ""
             length = None
             is_null = True
-            
+
             if "NOT NULL" in attr:
                 is_null = False
                 attr = attr.replace("NOT NULL", "").strip()
@@ -81,4 +81,34 @@ class SqlParser:
             attribute = Attribute(name, type, length, is_null)
             table.attributes.append(attribute)
 
+        if self.used_db is None:
+            return "Please use a database first."
+
+        for db in self.databases:
+            if db.name == self.used_db:
+                db.tables.append(table)
+                break
+
         return table
+
+    def parse_create_database(self, sql):
+        words = SqlParser.cleanup_command(sql)
+        if len(words) != 3:
+            return "Incorrect syntax."
+        db_name = words[words.index("DATABASE") + 1]
+        for db in self.databases:
+            if db.name == db_name:
+                return "The database name is taken."
+        self.databases.append(DataBase(db_name))
+        return "{} database created successfully.".format(db_name)
+
+    def parse_use_database(self, sql):
+        words = SqlParser.cleanup_command(sql)
+        if len(words) != 3:
+            return "Incorrect syntax."
+        db_name = words[words.index("DATABASE") + 1]
+        for db in self.databases:
+            if db.name == db_name:
+                self.used_db = db_name
+                return "The used database is {}.".format(self.used_db)
+        return "The database you want to use does not exist."

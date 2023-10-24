@@ -4,6 +4,7 @@ from model.DataBase import DataBase
 from model.Table import Table
 from model.Attribute import Attribute
 
+
 if __name__ == "__main__":
     # sql = """CREATE TABLE students (
     # StudID int PRIMARY KEY,
