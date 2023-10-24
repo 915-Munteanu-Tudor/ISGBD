@@ -1,5 +1,6 @@
 import socket
 
+from persistancy.GlobalRepository import GlobalRepository
 
 class Server:
     def __init__(self, host, port):
