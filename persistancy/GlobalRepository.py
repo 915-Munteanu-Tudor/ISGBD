@@ -39,7 +39,8 @@ class GlobalRepository:
         self.writeToFile()
 
     def drop_table(self, context_database, table_name):
-        pass
+        self.databases[context_database].tables.pop(table_name)
+        self.writeToFile()
 
     def create_index(self, context_database, index):
         pass

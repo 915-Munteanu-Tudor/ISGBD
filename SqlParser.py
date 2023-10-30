@@ -40,8 +40,7 @@ class SqlParser:
         table = Table(table_name)
 
         attr_defs = sql[sql.index("(") + 1: sql.rindex(")")]
-        attr_list = [x.strip() for x in attr_defs.split(",\n")]
-        print(attr_list)
+        attr_list = [x.strip() for x in attr_defs.split(",")]
 
         for attr in attr_list:
             length = None
@@ -87,7 +86,6 @@ class SqlParser:
             attr_info = re.findall(r"\w+", attr)
             name = attr_info[0]
             type = attr_info[1]
-            print(attr_info)
             if len(attr_info) > 2:
                 length = int(attr_info[2])
 
@@ -95,6 +93,7 @@ class SqlParser:
             attribute = Attribute(name, type, length, is_null)
             table.attributes.append(attribute)
 
+        self.global_repo.create_table(self.used_db, table)
         return "Table {} created successfully.".format(table_name)
 
     def parse_create_database(self, sql):
@@ -131,3 +130,15 @@ class SqlParser:
             return "The used database is {}.".format(self.used_db)
 
         return "The database you want to use does not exist."
+
+    def parse_drop_table(self, sql):
+        if len(sql) != 3:
+            return "Incorrect syntax."
+
+        table_name = sql[2]
+        for value in self.global_repo.databases[self.used_db].tables:
+            if value == table_name:
+                self.global_repo.drop_table(self.used_db, table_name)
+                return "Table {} dropped successfully.".format(table_name)
+
+        return "The table you want to drop does not exist."

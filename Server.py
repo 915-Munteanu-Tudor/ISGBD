@@ -37,9 +37,11 @@ class Server:
             return self.parser.parse_drop_database(command)
         if command[0] == "CREATE" and command[1] == "TABLE":
             return self.parser.parse_create_table(text)
+        if command[0] == "DROP" and command[1] == "TABLE":
+            return self.parser.parse_drop_table(command)
 
         return "Wrong command."
 
 
-server = Server('localhost', 8083)
+server = Server('localhost', 8082)
 server.start()
