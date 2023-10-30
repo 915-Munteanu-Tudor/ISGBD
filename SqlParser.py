@@ -33,9 +33,8 @@ class SqlParser:
 
         table_name = words[2]
 
-        # TODO: check if table already exists in the used db
-        # if table_name in self.global_repo.databases.get(self.used_db).tables.keys():
-        #     return "The used database already contains a table with this name."
+        if table_name in self.global_repo.databases[self.used_db].tables.keys():
+            return "The used database already contains a table with this name."
 
         table = Table(table_name)
 

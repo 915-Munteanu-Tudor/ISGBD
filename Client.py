@@ -18,7 +18,7 @@ class Client:
         return response
 
 
-client = Client('localhost', 8082)
+client = Client('localhost', 8081)
 while True:
     command = input("Enter SQL command: ")
     response = client.send_command(command)
