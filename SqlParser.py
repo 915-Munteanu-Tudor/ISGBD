@@ -1,5 +1,6 @@
 import re
 from model.Attribute import Attribute
+from model.Index import Index
 from model.Table import Table
 from model.DataBase import DataBase
 from persistancy.GlobalRepository import GlobalRepository
@@ -141,3 +142,33 @@ class SqlParser:
                 return "Table {} dropped successfully.".format(table_name)
 
         return "The table you want to drop does not exist."
+
+    def parse_create_index(self, sql):
+        if self.used_db is None:
+            return "Please use a database first."
+
+        sql = SqlParser.cleanup_command(sql, False)
+        words = sql.split()
+
+        table_name = words[4]
+        index_name = words[2]
+
+        if table_name not in self.global_repo.databases[self.used_db].tables.keys():
+            return "The table you want to create index on, does not exist."
+
+        indexes = self.global_repo.databases[self.used_db].tables[table_name].index_files
+        if len(indexes) > 0:
+            for idx in indexes:
+                if index_name == idx.name.split('.')[0]:
+                    return "There is already an index with this name on the table."
+
+        index = Index(index_name)
+
+        attr_defs = sql[sql.index("(") + 1: sql.rindex(")")]
+        attr_list = [x.strip() for x in attr_defs.split(",")]
+
+        for attr in attr_list:
+            index.attributes.append(attr)
+
+        self.global_repo.create_index(self.used_db, table_name, index)
+        return "The index {} on table {} was crated".format(index_name, table_name)

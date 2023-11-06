@@ -40,6 +40,8 @@ class Server:
                 return self.parser.parse_create_table(text)
             if command[0] == "DROP" and command[1] == "TABLE":
                 return self.parser.parse_drop_table(command)
+            if command[0] == "CREATE" and command[1] == "INDEX" and command[3] == "ON":
+                return self.parser.parse_create_index(text)
 
             return "Wrong command."
         except Exception as e:

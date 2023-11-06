@@ -14,4 +14,5 @@ class Table:
             "primary_key": self.primary_key,
             "foreign_keys": self.foreign_keys,
             "attributes": [attr.to_dict() for attr in self.attributes],
+            "index_files": [idx.to_dict() for idx in self.index_files]
         }

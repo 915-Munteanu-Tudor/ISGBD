@@ -3,6 +3,7 @@ import json
 
 from model.Attribute import Attribute
 from model.DataBase import DataBase
+from model.Index import Index
 from model.Table import Table
 
 
@@ -34,6 +35,10 @@ class GlobalRepository:
                         table.primary_key.append(key)
                     for key, value in table_data.get("foreign_keys", {}).items():
                         table.foreign_keys[key] = value
+                    for idx_data in table_data["index_files"]:
+                        index = Index(idx_data["name"])
+                        index.attributes.append(idx_data["attributes"])
+                        table.index_files.append(index)
                     database.tables[table_data["name"]] = table
                     databases[db_name] = database
             return databases
@@ -59,5 +64,6 @@ class GlobalRepository:
         self.databases[context_database].tables.pop(table_name)
         self.write_to_file()
 
-    def create_index(self, context_database, index):
-        pass
+    def create_index(self, context_database, table_name, index):
+        self.databases[context_database].tables[table_name].index_files.append(index)
+        self.write_to_file()
