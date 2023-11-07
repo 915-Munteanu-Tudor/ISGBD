@@ -37,7 +37,8 @@ class GlobalRepository:
                         table.foreign_keys[key] = value
                     for idx_data in table_data["index_files"]:
                         index = Index(idx_data["name"])
-                        index.attributes.append(idx_data["attributes"])
+                        for attr in idx_data["attributes"]:
+                            index.attributes.append(attr["attribute_name"])
                         table.index_files.append(index)
                     database.tables[table_data["name"]] = table
                     databases[db_name] = database
