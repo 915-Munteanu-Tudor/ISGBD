@@ -23,6 +23,40 @@
                     }
                 ],
                 "index_files": []
+            },
+            {
+                "name": "TST11",
+                "primary_key": [
+                    "ID"
+                ],
+                "foreign_keys": {},
+                "attributes": [
+                    {
+                        "name": "ID",
+                        "type": "INT",
+                        "length": null,
+                        "is_null": false
+                    },
+                    {
+                        "name": "AGG",
+                        "type": "VARCHAR",
+                        "length": 25,
+                        "is_null": true
+                    },
+                    {
+                        "name": "LS",
+                        "type": "BOOLEAN",
+                        "length": null,
+                        "is_null": true
+                    },
+                    {
+                        "name": "FX",
+                        "type": "FLOAT",
+                        "length": null,
+                        "is_null": true
+                    }
+                ],
+                "index_files": []
             }
         ]
     }

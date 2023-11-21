@@ -205,14 +205,51 @@ class SqlParser:
         db = self.global_repo.mongo_client[self.used_db]
         collection = db[table_name]
 
-        # TODO: check for cols count and type + isnull
-        # existent_columns = [col.name for col in
-        #                     self.global_repo.databases[self.used_db].tables[table_name].attributes]
+        table = self.global_repo.databases[self.used_db].tables.get(table_name)
+        actual_table_columns = [col for col in table.attributes]
+        actual_primary_key = table.primary_key
 
-        # for attr in attr_list:
+        column_names = [col.name for col in actual_table_columns]
+
+        if len(column_names) != len(attr_list):
+            return "Please insert values for each column."
+
+        primary_key_pos = column_names.index(actual_primary_key[0])
+        primary_key = attr_list[primary_key_pos]
+
+        for i in range(0, len(attr_list)):
+            if attr_list[i] == "NULL" and actual_table_columns[i].is_null is False:
+                return "{} cannot be null".format(actual_table_columns[i].name)
+
+            if actual_table_columns[i].type == "INT":
+                try:
+                    int(attr_list[i])
+                except ValueError:
+                    return "{} has int type.".format(actual_table_columns[i].name)
+
+            if actual_table_columns[i].type == "FLOAT":
+                try:
+                    float(attr_list[i])
+                except ValueError:
+                    return "{} has float type.".format(actual_table_columns[i].name)
+
+            if actual_table_columns[i].type == "BOOLEAN":
+                try:
+                    bool(attr_list[i])
+                    if attr_list[i] not in ["TRUE", "FALSE"]:
+                        return "{} has boolean type.".format(actual_table_columns[i].name)
+                except ValueError:
+                    return "{} has boolean type.".format(actual_table_columns[i].name)
+
+            if actual_table_columns[i].type == "VARCHAR":
+                if len(attr_list[i]) > actual_table_columns[i].length:
+                    return "Varchar {} has the maximum length of {}".format(actual_table_columns[i].name,
+                                                                            actual_table_columns[i].length)
+
+        attr_list.pop(primary_key_pos)
 
         try:
-            collection.insert_one({'_id': attr_list[0], 'value': '#'.join(attr_list[1:])})
+            collection.insert_one({'_id': primary_key, 'value': '#'.join(attr_list)})
         except DuplicateKeyError as e:
             return str(e.details.get('errmsg'))
         return "Inserted one row into table {}.".format(table_name)
