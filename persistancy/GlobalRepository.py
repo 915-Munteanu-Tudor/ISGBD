@@ -1,10 +1,11 @@
 import os
 import json
-
 from model.Attribute import Attribute
 from model.DataBase import DataBase
 from model.Index import Index
 from model.Table import Table
+from pymongo import MongoClient
+from pymongo.server_api import ServerApi
 
 
 class GlobalRepository:
@@ -13,9 +14,20 @@ class GlobalRepository:
     """
 
     def __init__(self):
+        self.mongo_client = MongoClient(
+            "mongodb+srv://tdr:JbEMLiFXtrnlt8LT@cluster0.lycgfjj.mongodb.net/?retryWrites=true&w=majority",
+            server_api=ServerApi('1'))
         self.file_path = os.path.join(os.getcwd(), 'resources', 'catalog.json')
         self.databases = self.read_from_file()
+        self.connect_to_mongo()
         # self.databases = {}
+
+    def connect_to_mongo(self):
+        try:
+            self.mongo_client.admin.command('ping')
+            print("Successfully connected to MongoDB!")
+        except Exception as e:
+            print(e)
 
     def read_from_file(self):
         if not os.path.exists(self.file_path):
@@ -41,7 +53,7 @@ class GlobalRepository:
                             index.attributes.append(attr["attribute_name"])
                         table.index_files.append(index)
                     database.tables[table_data["name"]] = table
-                    databases[db_name] = database
+                databases[db_name] = database
             return databases
 
     def write_to_file(self):

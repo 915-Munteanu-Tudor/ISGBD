@@ -1,4 +1,7 @@
 import re
+
+from pymongo.errors import DuplicateKeyError
+
 from model.Attribute import Attribute
 from model.Index import Index
 from model.Table import Table
@@ -74,6 +77,12 @@ class SqlParser:
                     attr_type = attr_info[1]
                     attr_length = attr_info[2] if len(attr_info) > 2 else None
                     foreign_key = re.findall(r"\w+", attr.split("REFERENCES")[1])
+                    if foreign_key[0] not in self.global_repo.databases[self.used_db].tables.keys():
+                        return "Cannot reference a nonexistent table."
+                    existent_columns = [col.name for col in
+                                        self.global_repo.databases[self.used_db].tables[foreign_key[0]].attributes]
+                    if foreign_key[1] not in existent_columns:
+                        return "Cannot reference a nonexistent column."
                     foreign_key = {"table": foreign_key[0], "attribute": foreign_key[1]}
                     table.foreign_keys[attr_name] = foreign_key
                     new_attribute = Attribute(
@@ -167,8 +176,62 @@ class SqlParser:
         attr_defs = sql[sql.index("(") + 1: sql.rindex(")")]
         attr_list = [x.strip() for x in attr_defs.split(",")]
 
+        table_columns = [col.name for col in self.global_repo.databases[self.used_db].tables[table_name].attributes]
+        nonexistent_columns = [col for col in attr_list if col not in table_columns]
+        if len(nonexistent_columns) > 0:
+            return "Columns " + ", ".join(nonexistent_columns) + " don't exist."
+
         for attr in attr_list:
             index.attributes.append(attr)
 
         self.global_repo.create_index(self.used_db, table_name, index)
         return "The index {} on table {} was crated".format(index_name, table_name)
+
+    def parse_insert(self, sql):
+        if self.used_db is None:
+            return "Please use a database first."
+
+        sql = SqlParser.cleanup_command(sql, False)
+        words = sql.split()
+
+        table_name = words[2]
+
+        if table_name not in self.global_repo.databases[self.used_db].tables.keys():
+            return "The table you want to insert to is nonexistent."
+
+        attr_defs = sql[sql.index("(") + 1: sql.rindex(")")]
+        attr_list = [x.strip() for x in attr_defs.split(",")]
+
+        db = self.global_repo.mongo_client[self.used_db]
+        collection = db[table_name]
+
+        # TODO: check for cols count and type + isnull
+        # existent_columns = [col.name for col in
+        #                     self.global_repo.databases[self.used_db].tables[table_name].attributes]
+
+        # for attr in attr_list:
+
+        try:
+            collection.insert_one({'_id': attr_list[0], 'value': '#'.join(attr_list[1:])})
+        except DuplicateKeyError as e:
+            return str(e.details.get('errmsg'))
+        return "Inserted one row into table {}.".format(table_name)
+
+    def parse_delete(self, sql):
+        if self.used_db is None:
+            return "Please use a database first."
+
+        table_name = sql[2]
+        _id = sql[4].split('=')[1]
+
+        if table_name not in self.global_repo.databases[self.used_db].tables.keys():
+            return "The table you want to delete from is nonexistent."
+
+        db = self.global_repo.mongo_client[self.used_db]
+        collection = db[table_name]
+
+        response = collection.delete_one({'_id': _id})
+
+        if response.deleted_count == 1:
+            return "Deleted the row with id {} from table {}.".format(_id, table_name)
+        return "There is no entry with id {}.".format(_id)

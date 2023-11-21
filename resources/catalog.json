@@ -1,0 +1,29 @@
+{
+    "X": {
+        "name": "X",
+        "tables": [
+            {
+                "name": "TST1",
+                "primary_key": [
+                    "ID"
+                ],
+                "foreign_keys": {},
+                "attributes": [
+                    {
+                        "name": "ID",
+                        "type": "INT",
+                        "length": null,
+                        "is_null": true
+                    },
+                    {
+                        "name": "AGG",
+                        "type": "VARCHAR",
+                        "length": 25,
+                        "is_null": true
+                    }
+                ],
+                "index_files": []
+            }
+        ]
+    }
+}

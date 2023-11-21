@@ -1,7 +1,6 @@
 class Table:
     def __init__(self, name):
         self.name = name
-        self.file_name = name + ".bin"
         self.attributes = []
         self.primary_key = []
         self.foreign_keys = {}
