@@ -41,6 +41,8 @@ class Server:
                 return self.parser.parse_drop_table(command)
             if command[0] == "CREATE" and command[1] == "INDEX" and command[3] == "ON":
                 return self.parser.parse_create_index(text)
+            if command[0] == "CREATE" and command[1] == "UNIQUE" and command[2] == "INDEX" and command[4] == "ON":
+                return self.parser.parse_create_unique_index(text)
             if command[0] == "INSERT" and command[1] == "INTO" and command[3] == "VALUES":
                 return self.parser.parse_insert(text)
             if command[0] == "DELETE" and command[1] == "FROM" and command[3] == "WHERE":

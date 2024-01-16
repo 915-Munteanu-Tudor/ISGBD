@@ -26,10 +26,18 @@ if __name__ == "__main__":
     # create table tst2 (id int primary key, xid int references tst1(id), ag varchar(25) not null)
     # create table tst3 (id int primary key)
     # create index idx on tst2 (ag)
+    # create unique index idx on tst2 (ag)
     # use database test2
     # create table tst1 (id int primary key, agg varchar(25))
+    # insert into tst2 values (8,3,la,fa)
     # drop database test2
     # drop table tst3
+
+    # create table tst1 (id int primary key, la varchar(25) not null, unique(la))
+    # create table tst2 (id int primary key, xid int references tst1(id), ag varchar(25))
+
+
+    # TST2
 
     repo = GlobalRepository()
 
