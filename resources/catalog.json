@@ -1,0 +1,191 @@
+{
+  "TEST": {
+    "name": "TEST",
+    "tables": [
+      {
+        "name": "DISCIPLINES",
+        "primary_key": ["DISCID"],
+        "foreign_keys": {},
+        "attributes": [
+          {
+            "name": "DISCID",
+            "type": "VARCHAR",
+            "length": 5,
+            "is_null": true
+          },
+          {
+            "name": "DNAME",
+            "type": "VARCHAR",
+            "length": 20,
+            "is_null": true
+          },
+          {
+            "name": "CREDITNR",
+            "type": "INT",
+            "length": null,
+            "is_null": true
+          }
+        ],
+        "index_files": [
+          {
+            "name": "DISCIPLINES_DISCID",
+            "keyLength": 18,
+            "is_unique": 0,
+            "indexType": "BTree",
+            "attributes": [
+              {
+                "attribute_name": "DISCID"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "SPECIALIZATION",
+        "primary_key": ["SPECID"],
+        "foreign_keys": {},
+        "attributes": [
+          {
+            "name": "SPECID",
+            "type": "VARCHAR",
+            "length": 5,
+            "is_null": true
+          },
+          {
+            "name": "SPECNAME",
+            "type": "VARCHAR",
+            "length": 40,
+            "is_null": true
+          },
+          {
+            "name": "LANGUAGE",
+            "type": "VARCHAR",
+            "length": 20,
+            "is_null": true
+          }
+        ],
+        "index_files": [
+          {
+            "name": "SPECIALIZATION_SPECID",
+            "keyLength": 21,
+            "is_unique": 0,
+            "indexType": "BTree",
+            "attributes": [
+              {
+                "attribute_name": "SPECID"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "GROUPS",
+        "primary_key": ["GROUPID"],
+        "foreign_keys": {
+          "SPECID": {
+            "table": "SPECIALIZATION",
+            "attribute": "SPECID"
+          }
+        },
+        "attributes": [
+          {
+            "name": "GROUPID",
+            "type": "INT",
+            "length": null,
+            "is_null": true
+          },
+          {
+            "name": "SPECID",
+            "type": "VARCHAR",
+            "length": 20,
+            "is_null": true
+          }
+        ],
+        "index_files": [
+          {
+            "name": "GROUPS_GROUPID",
+            "keyLength": 14,
+            "is_unique": 0,
+            "indexType": "BTree",
+            "attributes": [
+              {
+                "attribute_name": "GROUPID"
+              }
+            ]
+          },
+          {
+            "name": "GROUPS_SPECID",
+            "keyLength": 13,
+            "is_unique": 0,
+            "indexType": "BTree",
+            "attributes": [
+              {
+                "attribute_name": "SPECID"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "STUDENTS",
+        "primary_key": ["STUDID"],
+        "foreign_keys": {
+          "GROUPID": {
+            "table": "GROUPS",
+            "attribute": "GROUPID"
+          }
+        },
+        "attributes": [
+          {
+            "name": "STUDID",
+            "type": "INT",
+            "length": null,
+            "is_null": true
+          },
+          {
+            "name": "GROUPID",
+            "type": "INT",
+            "length": null,
+            "is_null": true
+          },
+          {
+            "name": "STUDNAME",
+            "type": "VARCHAR",
+            "length": 20,
+            "is_null": true
+          },
+          {
+            "name": "EMAIL",
+            "type": "VARCHAR",
+            "length": 60,
+            "is_null": true
+          }
+        ],
+        "index_files": [
+          {
+            "name": "STUDENTS_STUDID",
+            "keyLength": 15,
+            "is_unique": 0,
+            "indexType": "BTree",
+            "attributes": [
+              {
+                "attribute_name": "STUDID"
+              }
+            ]
+          },
+          {
+            "name": "STUDENTS_GROUPID",
+            "keyLength": 16,
+            "is_unique": 0,
+            "indexType": "BTree",
+            "attributes": [
+              {
+                "attribute_name": "GROUPID"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

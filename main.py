@@ -36,7 +36,6 @@ if __name__ == "__main__":
     # create table tst1 (id int primary key, la varchar(25) not null, unique(la))
     # create table tst2 (id int primary key, xid int references tst1(id), ag varchar(25))
 
-
     # TST2
 
     repo = GlobalRepository()

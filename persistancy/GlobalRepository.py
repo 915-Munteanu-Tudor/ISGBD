@@ -6,6 +6,13 @@ from model.Index import Index
 from model.Table import Table
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
+import certifi
+
+username = "teo1234"
+password = "1234"
+cluster_details = "teodoramedia.1xrfk15"
+
+connection_string = f"mongodb+srv://{username}:{password}@{cluster_details}.mongodb.net/?retryWrites=true&w=majority"
 
 
 class GlobalRepository:
@@ -15,16 +22,16 @@ class GlobalRepository:
 
     def __init__(self):
         self.mongo_client = MongoClient(
-            "mongodb+srv://tdr:JbEMLiFXtrnlt8LT@cluster0.lycgfjj.mongodb.net/?retryWrites=true&w=majority",
-            server_api=ServerApi('1'))
-        self.file_path = os.path.join(os.getcwd(), 'resources', 'catalog.json')
+            connection_string, tlsCAFile=certifi.where(), server_api=ServerApi("1")
+        )
+        self.file_path = os.path.join(os.getcwd(), "resources", "catalog.json")
         self.databases = self.read_from_file()
         self.connect_to_mongo()
         # self.databases = {}
 
     def connect_to_mongo(self):
         try:
-            self.mongo_client.admin.command('ping')
+            self.mongo_client.admin.command("ping")
             print("Successfully connected to MongoDB!")
         except Exception as e:
             print(e)
@@ -33,7 +40,7 @@ class GlobalRepository:
         if not os.path.exists(self.file_path):
             return {}
 
-        with open(self.file_path, 'r') as f:
+        with open(self.file_path, "r") as f:
             data = json.load(f)
             databases = {}
             for db_name, db_data in data.items():
@@ -41,7 +48,12 @@ class GlobalRepository:
                 for table_data in db_data["tables"]:
                     table = Table(table_data["name"])
                     for attr_data in table_data["attributes"]:
-                        attribute = Attribute(attr_data["name"], attr_data["type"], attr_data["length"], attr_data["is_null"])
+                        attribute = Attribute(
+                            attr_data["name"],
+                            attr_data["type"],
+                            attr_data["length"],
+                            attr_data["is_null"],
+                        )
                         table.attributes.append(attribute)
                     for key in table_data.get("primary_key", []):
                         table.primary_key.append(key)
@@ -57,8 +69,10 @@ class GlobalRepository:
             return databases
 
     def write_to_file(self):
-        data_to_serialize = {name: table.to_dict() for name, table in self.databases.items()}
-        with open(self.file_path, 'w') as f:
+        data_to_serialize = {
+            name: table.to_dict() for name, table in self.databases.items()
+        }
+        with open(self.file_path, "w") as f:
             json.dump(data_to_serialize, f, indent=4)
 
     def create_database(self, database):

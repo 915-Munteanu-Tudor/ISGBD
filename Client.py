@@ -10,15 +10,15 @@ class Client:
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.connect((self.host, self.port))
 
-        client_socket.send(command.encode('utf-8'))
+        client_socket.send(command.encode("utf-8"))
 
-        response = client_socket.recv(1024).decode('utf-8')
+        response = client_socket.recv(1024).decode("utf-8")
         client_socket.close()
 
         return response
 
 
-client = Client('localhost', 8081)
+client = Client("localhost", 8081)
 while True:
     command = input("Enter SQL command: ")
     response = client.send_command(command)
