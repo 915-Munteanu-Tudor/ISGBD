@@ -487,7 +487,7 @@ class SqlParser:
 
         # Step 3: Apply DISTINCT if necessary
         if is_distinct:
-            records = self.apply_distinct(records)
+            records = self.apply_distinct(records, attributes)
 
         # Step 4: Format and return results
         formatted_results = self.format_results(records, attributes)
@@ -533,10 +533,25 @@ class SqlParser:
             # No joins, simply apply remaining conditions
             for table_name, records in table_records.items():
                 for record in records:
-                    if self.record_meets_conditions(record, remaining_conditions):
-                        filtered_records.append(record)
+                    deserialized_record = self.deserialize_record(record, table_name)
+                    if self.record_meets_conditions(
+                        deserialized_record, remaining_conditions
+                    ):
+                        filtered_records.append(deserialized_record)
 
         return filtered_records
+
+    def deserialize_record(self, record, table_name):
+        deserialized_record = {}
+        record_values = [record["_id"]]
+        record_values.extend(record["value"].split("#"))
+
+        for i, attribute in enumerate(
+            self.global_repo.databases[self.used_db].tables[table_name].attributes
+        ):
+            deserialized_record[attribute.name] = record_values[i]
+
+        return deserialized_record
 
     def separate_join_conditions(self, conditions):
         # Logic to separate join conditions from other conditions
@@ -558,7 +573,7 @@ class SqlParser:
             table_name, attr_name = self.split_attribute(attribute)
             attr_type = self.get_attribute_type(table_name, attr_name)
 
-            if attr_name in record and not self.evaluate_condition(
+            if not self.evaluate_condition(
                 record[attr_name], attr_type, operator, value
             ):
                 return False
@@ -583,8 +598,9 @@ class SqlParser:
         else:
             # If no table name is specified, find the attribute in the involved tables
             for table in self.global_repo.databases[self.used_db].tables.values():
-                if attribute in table.attributes:
-                    return table.attributes[attribute].type
+                for table_attribute in table.attributes:
+                    if attribute == table_attribute.name:
+                        return table_attribute.type
         raise ValueError(f"Attribute type for {attribute} not found")
 
     def format_results(self, records, attributes):
@@ -593,14 +609,8 @@ class SqlParser:
         formatted_rows = [header]
 
         for record in records:
-            # Split the record values
-            record_values = record["value"].split("#")
-
-            # Map each attribute to its corresponding value
-            record_dict = dict(zip(attributes, record_values))
-
             # Create a row for each record
-            row = "\t".join([record_dict.get(attr, "") for attr in attributes])
+            row = "\t".join([record.get(attr, "") for attr in attributes])
             formatted_rows.append(row)
 
         # Combine all rows into a single string
@@ -621,6 +631,7 @@ class SqlParser:
         db = self.global_repo.mongo_client[self.used_db]
         index_collection = db[f"{table_name}_{attribute}"]
 
+        # TODO: fix mongo query to check based on type not literal string
         query = {f"_id": {self.translate_to_mongo_operator(operator): value}}
         results = index_collection.find(query)
 
@@ -637,6 +648,8 @@ class SqlParser:
         primary_keys_per_condition = []
 
         used_conditions = []
+        join_conditions, other_conditions = self.separate_join_conditions(conditions)
+
         for condition in conditions:
             attribute, operator, value = self.parse_condition(condition)
             used_condition = False
@@ -666,7 +679,7 @@ class SqlParser:
 
     # ============ utils
     def parse_condition(self, condition):
-        parts = re.split(r"(\W+)", condition)
+        parts = condition.split(" ")
         attribute = parts[0].strip()
         operator = parts[1].strip()
         value = parts[2].strip().strip("'").strip('"')
@@ -724,6 +737,19 @@ class SqlParser:
         elif operator == "<=":
             return record_value <= value
 
-    def apply_distinct(self, records):
-        unique_records = list(set(records))
+    def apply_distinct(self, records, attributes):
+        unique_records = []
+        seen_combinations = set()
+
+        for record in records:
+            # Create a tuple of values for the specified attributes
+            attribute_values = tuple(
+                record[attr] for attr in attributes if attr in record
+            )
+
+            # Check if this combination of values has already been seen
+            if attribute_values not in seen_combinations:
+                seen_combinations.add(attribute_values)
+                unique_records.append(record)
+
         return unique_records

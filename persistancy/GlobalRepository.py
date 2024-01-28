@@ -8,9 +8,9 @@ from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 import certifi
 
-username = "teo1234"
-password = "1234"
-cluster_details = "teodoramedia.1xrfk15"
+username = ""
+password = ""
+cluster_details = ""
 
 connection_string = f"mongodb+srv://{username}:{password}@{cluster_details}.mongodb.net/?retryWrites=true&w=majority"
 

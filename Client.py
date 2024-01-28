@@ -22,4 +22,5 @@ client = Client("localhost", 8081)
 while True:
     command = input("Enter SQL command: ")
     response = client.send_command(command)
-    print("Server says:", response)
+    print("Server says:")
+    print(response)
