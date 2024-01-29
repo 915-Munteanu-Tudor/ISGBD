@@ -1,52 +1,64 @@
 import json
+import time
+from Client import Client
+# from Server import Server
 from persistancy.GlobalRepository import GlobalRepository
 from model.DataBase import DataBase
 from model.Table import Table
 from model.Attribute import Attribute
 
-if __name__ == "__main__":
-    # sql = """CREATE TABLE students (
-    # StudID int PRIMARY KEY,
-    # GroupId int REFERENCES groups(GroupID),
-    # StudName varchar(20),
-    # Email varchar(20)
-    # )"""
+import random
+import string
 
-    # sql2 = """CREATE TABLE marks (
-    # StudID int(10) REFERENCES students(StudID),
-    # DiscID varchar(20) REFERENCES disciplines(DiscID),
-    # Mark int NOT NULL,
-    # PRIMARY KEY (StudID,DiscID)
-    # )"""
+def generate_random_string(length):
+    return ''.join(random.choice(string.ascii_letters) for _ in range(length))
 
-    # create database test1
-    # create database test2
-    # use database test1
-    # create table tst1 (id int primary key)
-    # create table tst2 (id int primary key, xid int references tst1(id), ag varchar(25) not null)
-    # create table tst3 (id int primary key)
-    # create index idx on tst2 (ag)
-    # create unique index idx on tst2 (ag)
-    # use database test2
-    # create table tst1 (id int primary key, agg varchar(25))
-    # insert into tst2 values (8,3,la,fa)
-    # drop database test2
-    # drop table tst3
+def create_insert_sql(table_name, user_id, username, age, email):
+    return f"INSERT INTO {table_name} VALUES ({user_id}, {username}, {age}, {email});"
 
-    # create table tst1 (id int primary key, la varchar(25) not null, unique(la))
-    # create table tst2 (id int primary key, xid int references tst1(id), ag varchar(25))
 
-    # TST2
+if __name__ == "__main__":    
+    # server = Server("localhost", 8081)
 
-    repo = GlobalRepository()
+    # number_of_records = 1000000
+    table_name_indexed = 'Users_Indexed'
+    table_name_non_indexed = 'Users_NonIndexed'
+    
+    # server.execute_command("USE DATABASE TEST2")
 
-    testdb = DataBase("TEST")
+    # for i in range(2596, number_of_records):
+    #     username = f'user_{i}'
+    #     age = random.randint(18, 100)
+    #     email = f'user{i}@example.com'
 
-    testAttr = Attribute("id", "int", 10)
+    #     # Generate SQL for table with index
+    #     sql_indexed = create_insert_sql(table_name_indexed, i, username, age, email)
+    #     response = server.execute_command(sql_indexed)
+    #     print(f"Insert Indexed: {response}")
 
-    table = Table("test_table")
-    table.attributes.append(testAttr)
-    table.primary_key.extend("id")
+    #     # Generate SQL for table without index
+    #     sql_non_indexed = create_insert_sql(table_name_non_indexed, i, username, age, email)
+    #     response = server.execute_command(sql_non_indexed)
+    #     print(f"Insert Non-Indexed: {response}")
+    
+    
+    client = Client("localhost", 8081)
+    
+    last_record_id = 1500
+    
+    client.send_command("USE DATABASE TEST2")
+    start_time = time.time()
+    client.send_command(f'SELECT USERID,USERNAME,AGE,EMAIL FROM {table_name_indexed} WHERE EMAIL = USER{last_record_id}@EXAMPLE.COM')
+    print(f"Query on Indexed Table took: {time.time() - start_time} seconds")
 
-    testdb.tables["test_table"] = table
-    repo.create_database(testdb)
+    start_time = time.time()
+    client.send_command(f'SELECT USERID,USERNAME,AGE,EMAIL FROM {table_name_non_indexed} WHERE EMAIL = USER{last_record_id}@EXAMPLE.COM')
+    print(f"Query on Non-Indexed Table took: {time.time() - start_time} seconds")
+    
+    # for 1.500 records
+    # Query on Indexed Table took: 0.2867288589477539 seconds
+    # Query on Non-Indexed Table took: 0.5760180950164795 seconds
+    
+    # for 2.500 records
+    # Query on Indexed Table took: 0.26223015785217285 seconds
+    # Query on Non-Indexed Table took: 0.6615841388702393 seconds

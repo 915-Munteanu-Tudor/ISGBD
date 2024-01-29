@@ -449,6 +449,7 @@ class SqlParser:
         if "distinct" in sql.lower():
             is_distinct = True
 
+        # Extract attributes names
         attributes_part = re.search(
             r"SELECT\s+DISTINCT\s+(.*?)\s+FROM", sql, re.IGNORECASE
         )
@@ -648,7 +649,7 @@ class SqlParser:
         primary_keys_per_condition = []
 
         used_conditions = []
-        join_conditions, other_conditions = self.separate_join_conditions(conditions)
+        # join_conditions, other_conditions = self.separate_join_conditions(conditions)
 
         for condition in conditions:
             attribute, operator, value = self.parse_condition(condition)

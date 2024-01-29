@@ -187,5 +187,109 @@
         ]
       }
     ]
+  },
+  "TEST2": {
+    "name": "TEST2",
+    "tables": [
+      {
+        "name": "USERS_INDEXED",
+        "primary_key": ["USERID"],
+        "foreign_keys": {},
+        "attributes": [
+          {
+            "name": "USERID",
+            "type": "INT",
+            "length": null,
+            "is_null": true
+          },
+          {
+            "name": "USERNAME",
+            "type": "VARCHAR",
+            "length": 100,
+            "is_null": true
+          },
+          {
+            "name": "AGE",
+            "type": "INT",
+            "length": null,
+            "is_null": true
+          },
+          {
+            "name": "EMAIL",
+            "type": "VARCHAR",
+            "length": 100,
+            "is_null": true
+          }
+        ],
+        "index_files": [
+          {
+            "name": "USERS_INDEXED_USERID",
+            "keyLength": 20,
+            "is_unique": 0,
+            "indexType": "BTree",
+            "attributes": [
+              {
+                "attribute_name": "USERID"
+              }
+            ]
+          },
+          {
+            "name": "USERS_INDEXED_EMAIL",
+            "keyLength": 19,
+            "is_unique": 1,
+            "indexType": "BTree",
+            "attributes": [
+              {
+                "attribute_name": "EMAIL"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "USERS_NONINDEXED",
+        "primary_key": ["USERID"],
+        "foreign_keys": {},
+        "attributes": [
+          {
+            "name": "USERID",
+            "type": "INT",
+            "length": null,
+            "is_null": true
+          },
+          {
+            "name": "USERNAME",
+            "type": "VARCHAR",
+            "length": 100,
+            "is_null": true
+          },
+          {
+            "name": "AGE",
+            "type": "INT",
+            "length": null,
+            "is_null": true
+          },
+          {
+            "name": "EMAIL",
+            "type": "VARCHAR",
+            "length": 100,
+            "is_null": true
+          }
+        ],
+        "index_files": [
+          {
+            "name": "USERS_NONINDEXED_USERID",
+            "keyLength": 23,
+            "is_unique": 0,
+            "indexType": "BTree",
+            "attributes": [
+              {
+                "attribute_name": "USERID"
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 }
