@@ -19,10 +19,13 @@ class Server:
             client_socket, client_address = server_socket.accept()
             print(f"Connection from {client_address}")
 
-            data = client_socket.recv(1024).decode('utf-8')
+            data = client_socket.recv(1024).decode("utf-8")
             response = self.execute_command(data)
 
-            client_socket.send(response.encode('utf-8'))
+            try:
+                client_socket.send(response.encode("utf-8"))
+            except Exception as e:
+                print(e)
             client_socket.close()
 
     def execute_command(self, command):
@@ -41,17 +44,32 @@ class Server:
                 return self.parser.parse_drop_table(command)
             if command[0] == "CREATE" and command[1] == "INDEX" and command[3] == "ON":
                 return self.parser.parse_create_index(text)
-            if command[0] == "CREATE" and command[1] == "UNIQUE" and command[2] == "INDEX" and command[4] == "ON":
+            if (
+                command[0] == "CREATE"
+                and command[1] == "UNIQUE"
+                and command[2] == "INDEX"
+                and command[4] == "ON"
+            ):
                 return self.parser.parse_create_unique_index(text)
-            if command[0] == "INSERT" and command[1] == "INTO" and command[3] == "VALUES":
+            if (
+                command[0] == "INSERT"
+                and command[1] == "INTO"
+                and command[3] == "VALUES"
+            ):
                 return self.parser.parse_insert(text)
-            if command[0] == "DELETE" and command[1] == "FROM" and command[3] == "WHERE":
+            if (
+                command[0] == "DELETE"
+                and command[1] == "FROM"
+                and command[3] == "WHERE"
+            ):
                 return self.parser.parse_delete(command)
+            if command[0] == "SELECT":
+                return self.parser.parse_select(text)
 
             return "Wrong command."
         except Exception as e:
             return e
 
 
-server = Server('localhost', 8081)
+server = Server("localhost", 8081)
 server.start()
